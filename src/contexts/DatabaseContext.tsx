@@ -1,7 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, UserRole } from "@/contexts/AuthContext";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
+
+export { UserRole };
 
 export interface Profile extends User {
   headline?: string;

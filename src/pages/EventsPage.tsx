@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,7 +31,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import LazyImage from "@/components/ui/LazyImage";
 
-// Event form schema
 const eventFormSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().min(1, { message: "Description is required" }),
@@ -49,7 +47,6 @@ const EventsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  // Format date for display
   const formatEventDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "PPP 'at' p");
@@ -58,14 +55,12 @@ const EventsPage = () => {
     }
   };
   
-  // Filter events by search query
   const filteredEvents = events.filter(event => 
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.location.toLowerCase().includes(searchQuery.toLowerCase())
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
-  // Set up form
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -77,12 +72,15 @@ const EventsPage = () => {
     },
   });
   
-  // Handle form submission
   const onSubmit = (values: EventFormValues) => {
     if (!user) return;
     
     addEvent({
-      ...values,
+      title: values.title,
+      description: values.description,
+      date: values.date,
+      location: values.location,
+      image: values.image,
       createdBy: user.id,
     });
     
