@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -84,12 +85,74 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				'fade-out': {
+					from: { opacity: '1' },
+					to: { opacity: '0' }
+				},
+				'slide-in-up': {
+					from: { 
+						opacity: '0',
+						transform: 'translateY(20px)'
+					},
+					to: { 
+						opacity: '1',
+						transform: 'translateY(0)'
+					},
+				},
+				'slide-in-left': {
+					from: { 
+						opacity: '0',
+						transform: 'translateX(-20px)'
+					},
+					to: { 
+						opacity: '1',
+						transform: 'translateX(0)'
+					},
+				},
+				'slide-in-right': {
+					from: { 
+						opacity: '0',
+						transform: 'translateX(20px)'
+					},
+					to: { 
+						opacity: '1',
+						transform: 'translateX(0)'
+					},
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'slide-in-up': 'slide-in-up 0.4s ease-out',
+				'slide-in-left': 'slide-in-left 0.4s ease-out',
+				'slide-in-right': 'slide-in-right 0.4s ease-out',
+				'pulse-slow': 'pulse-slow 3s infinite'
+			},
+			boxShadow: {
+				'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
+				'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.1)',
+				'subtle': '0 2px 10px rgba(0, 0, 0, 0.05)',
+				'elevation': '0 2px 4px rgba(0, 0, 0, 0.02), 0 4px 8px rgba(0, 0, 0, 0.04)',
+				'elevation-md': '0 4px 8px rgba(0, 0, 0, 0.03), 0 8px 16px rgba(0, 0, 0, 0.06)',
+			},
+			transitionProperty: {
+				'height': 'height',
+				'spacing': 'margin, padding',
+			},
+			transitionDuration: {
+				'400': '400ms',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
