@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, UserRole } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export { UserRole };
+export type { UserRole };
 
 export interface Profile extends User {
   headline?: string;
@@ -83,7 +83,6 @@ interface DatabaseContextType {
   deleteEvent: (id: string) => void;
 }
 
-// Mock data
 const mockProfiles: Profile[] = [
   {
     id: "1",
@@ -381,7 +380,6 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
 
-  // Store data in localStorage for persistence
   useEffect(() => {
     try {
       const storedProfiles = localStorage.getItem("alumniAppProfiles");
@@ -398,7 +396,6 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Save data whenever it changes
   useEffect(() => {
     localStorage.setItem("alumniAppProfiles", JSON.stringify(profiles));
   }, [profiles]);
@@ -492,7 +489,6 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setMessages((prev) => [...prev, newMessage]);
 
-    // Update or create conversation
     const participantIds = [senderId, receiverId].sort();
     const existingConversation = conversations.find(
       (c) => c.participants.includes(senderId) && c.participants.includes(receiverId)
@@ -542,7 +538,6 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({
       })
     );
 
-    // Update unread count in conversation
     const conversation = conversations.find(
       (c) => c.participants.includes(senderId) && c.participants.includes(receiverId)
     );
