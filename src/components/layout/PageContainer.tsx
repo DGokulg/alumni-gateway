@@ -5,24 +5,13 @@ import { cn } from "@/lib/utils";
 interface PageContainerProps {
   children: React.ReactNode;
   className?: string;
-  fullWidth?: boolean;
 }
 
-const PageContainer = ({
-  children,
-  className,
-  fullWidth = false,
-}: PageContainerProps) => {
+const PageContainer: React.FC<PageContainerProps> = ({ children, className }) => {
   return (
-    <main
-      className={cn(
-        "min-h-[calc(100vh-4rem-16rem)] page-transition",
-        fullWidth ? "w-full" : "container px-4 py-8 md:px-6 md:py-12",
-        className
-      )}
-    >
+    <div className={cn("container mx-auto px-4 py-8", className)}>
       {children}
-    </main>
+    </div>
   );
 };
 

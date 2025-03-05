@@ -1,152 +1,136 @@
 
 import React from "react";
-import { Profile, Education, Experience } from "@/contexts/DatabaseContext";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Profile } from "@/contexts/DatabaseContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { 
-  GraduationCap, 
-  Briefcase, 
-  Calendar, 
-  MapPin,
-  Award
-} from "lucide-react";
-import { format } from "date-fns";
+import { Briefcase, GraduationCap, Calendar } from "lucide-react";
 
 interface ProfileContentProps {
   profile: Profile;
 }
 
-const ProfileContent = ({ profile }: ProfileContentProps) => {
+const ProfileContent: React.FC<ProfileContentProps> = ({ profile }) => {
+  // Format date helper (YYYY-MM-DD)
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "";
+    try {
+      return format(parseISO(dateString), "MMM yyyy");
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* About Section */}
-      {profile.bio && (
-        <Card>
-          <CardHeader>
-            <CardTitle>About</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{profile.bio}</p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Bio */}
+      <Card>
+        <CardHeader>
+          <CardTitle>About</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">{profile.bio || "No bio provided."}</p>
+        </CardContent>
+      </Card>
 
-      {/* Experience Section */}
-      {profile.experience && profile.experience.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Experience</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {profile.experience.map((exp, index) => (
-              <div key={exp.id}>
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                      <Briefcase className="h-5 w-5 text-primary" />
+      {/* Experience, Education, Skills */}
+      <Tabs defaultValue="experience">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="experience">Experience</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="experience" className="pt-2">
+          <Card>
+            <CardContent className="pt-6">
+              {profile.experience && profile.experience.length > 0 ? (
+                <div className="space-y-6">
+                  {profile.experience.map((exp) => (
+                    <div key={exp.id} className="relative pl-8 pb-4 border-b last:border-0 last:pb-0">
+                      <div className="absolute left-0 top-0">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10">
+                          <Briefcase className="h-3 w-3 text-primary" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{exp.title}</h3>
+                        <p className="text-sm">{exp.company}</p>
+                        <div className="flex items-center text-xs text-muted-foreground mt-1">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {formatDate(exp.startDate)} — {exp.current ? "Present" : formatDate(exp.endDate)}
+                        </div>
+                        {exp.location && (
+                          <p className="text-xs text-muted-foreground mt-1">{exp.location}</p>
+                        )}
+                        {exp.description && (
+                          <p className="text-sm mt-2">{exp.description}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-1 flex-1">
-                    <h4 className="font-medium">{exp.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {exp.company}
-                      {exp.location && (
-                        <span className="flex items-center text-xs mt-0.5">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {exp.location}
-                        </span>
-                      )}
-                    </p>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <time>
-                        {format(new Date(exp.startDate), "MMM yyyy")} -{" "}
-                        {exp.current
-                          ? "Present"
-                          : exp.endDate && format(new Date(exp.endDate), "MMM yyyy")}
-                      </time>
-                    </div>
-                    {exp.description && (
-                      <p className="text-sm mt-2">{exp.description}</p>
-                    )}
-                  </div>
+                  ))}
                 </div>
-                {index < profile.experience.length - 1 && (
-                  <Separator className="my-4" />
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Education Section */}
-      {profile.education && profile.education.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Education</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {profile.education.map((edu, index) => (
-              <div key={edu.id}>
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                      <GraduationCap className="h-5 w-5 text-primary" />
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No experience added yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="education" className="pt-2">
+          <Card>
+            <CardContent className="pt-6">
+              {profile.education && profile.education.length > 0 ? (
+                <div className="space-y-6">
+                  {profile.education.map((edu) => (
+                    <div key={edu.id} className="relative pl-8 pb-4 border-b last:border-0 last:pb-0">
+                      <div className="absolute left-0 top-0">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10">
+                          <GraduationCap className="h-3 w-3 text-primary" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{edu.institution}</h3>
+                        <p className="text-sm">
+                          {edu.degree} in {edu.field}
+                        </p>
+                        <div className="flex items-center text-xs text-muted-foreground mt-1">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {formatDate(edu.startDate)} — {edu.current ? "Present" : formatDate(edu.endDate)}
+                        </div>
+                        {edu.description && (
+                          <p className="text-sm mt-2">{edu.description}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-1 flex-1">
-                    <h4 className="font-medium">{edu.institution}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {edu.degree} in {edu.field}
-                    </p>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <time>
-                        {format(new Date(edu.startDate), "MMM yyyy")} -{" "}
-                        {edu.current
-                          ? "Present"
-                          : edu.endDate && format(new Date(edu.endDate), "MMM yyyy")}
-                      </time>
-                    </div>
-                    {edu.description && (
-                      <p className="text-sm mt-2">{edu.description}</p>
-                    )}
-                  </div>
+                  ))}
                 </div>
-                {index < profile.education.length - 1 && (
-                  <Separator className="my-4" />
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Skills Section */}
-      {profile.skills && profile.skills.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Skills</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {profile.skills.map((skill) => (
-                <Badge key={skill} className="bg-primary/10 hover:bg-primary/20 text-primary-foreground">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No education added yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="skills" className="pt-2">
+          <Card>
+            <CardContent className="pt-6">
+              {profile.skills && profile.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No skills added yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

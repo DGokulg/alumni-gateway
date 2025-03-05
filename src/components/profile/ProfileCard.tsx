@@ -2,29 +2,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Profile } from "@/contexts/DatabaseContext";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
-import LazyImage from "../ui/LazyImage";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { UserCheck, UserPlus } from "lucide-react";
 
 interface ProfileCardProps {
   profile: Profile;
   isConnected?: boolean;
   onConnect?: () => void;
-  className?: string;
 }
 
-const ProfileCard = ({
-  profile,
-  isConnected = false,
-  onConnect,
-  className,
-}: ProfileCardProps) => {
-  const { id, name, avatar, headline, location, role, skills } = profile;
-
+const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isConnected, onConnect }) => {
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name
@@ -35,73 +24,74 @@ const ProfileCard = ({
   };
 
   return (
-    <Card className={cn("overflow-hidden transition-all hover:shadow-md", className)}>
-      <div className="h-24 bg-gradient-to-r from-primary/20 to-primary/40 relative">
+    <Card className="overflow-hidden h-full flex flex-col">
+      <div className="h-24 bg-gradient-to-r from-primary/20 to-primary/40">
         {profile.coverImage && (
-          <LazyImage
+          <img
             src={profile.coverImage}
-            alt={`${name}'s cover`}
+            alt={`${profile.name}'s cover`}
             className="w-full h-full object-cover"
           />
         )}
       </div>
-      <CardContent className="pt-0 pb-3">
-        <div className="flex justify-between -mt-10">
-          <Avatar className="h-20 w-20 border-4 border-background">
-            <AvatarImage src={avatar} alt={name} />
-            <AvatarFallback className="text-lg">{getInitials(name)}</AvatarFallback>
+      <CardContent className="pt-0 pb-4 flex-1">
+        <div className="flex justify-between -mt-10 mb-4">
+          <Avatar className="h-20 w-20 ring-4 ring-background">
+            <AvatarImage src={profile.avatar} alt={profile.name} />
+            <AvatarFallback className="text-lg">{getInitials(profile.name)}</AvatarFallback>
           </Avatar>
-          <Badge
-            variant="outline"
-            className="mt-2 capitalize border-primary/20 text-primary-foreground bg-primary/10"
-          >
-            {role}
-          </Badge>
+          <div className="bg-primary/10 text-primary-foreground rounded px-2 py-1 h-fit mt-2 text-xs uppercase font-medium">
+            {profile.role}
+          </div>
         </div>
-        <div className="mt-3 space-y-1.5">
-          <Link to={`/profile/${id}`} className="hover:underline">
-            <h3 className="font-semibold text-lg leading-none">{name}</h3>
-          </Link>
-          {headline && (
-            <p className="text-sm text-muted-foreground line-clamp-2">{headline}</p>
+        <div>
+          <h3 className="font-semibold text-lg">{profile.name}</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {profile.headline || (profile.role === "student" ? "Student" : "Alumni")}
+          </p>
+          
+          {profile.location && (
+            <p className="text-xs text-muted-foreground mt-2">{profile.location}</p>
           )}
-          {location && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{location}</span>
+          
+          {profile.skills && profile.skills.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-medium mb-2">Skills</p>
+              <div className="flex flex-wrap gap-1">
+                {profile.skills.slice(0, 3).map((skill) => (
+                  <span 
+                    key={skill} 
+                    className="bg-muted px-2 py-1 rounded-full text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
+                {profile.skills.length > 3 && (
+                  <span className="bg-muted px-2 py-1 rounded-full text-xs">
+                    +{profile.skills.length - 3}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
-        {skills && skills.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {skills.slice(0, 3).map((skill) => (
-              <Badge key={skill} variant="secondary" className="text-xs">
-                {skill}
-              </Badge>
-            ))}
-            {skills.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{skills.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
       </CardContent>
-      <CardFooter className="border-t pt-3 flex justify-between">
-        <Link to={`/profile/${id}`}>
-          <Button variant="ghost" size="sm" className="text-xs">
-            View Profile
-            <ExternalLink className="h-3 w-3 ml-1" />
-          </Button>
-        </Link>
+      <CardFooter className="flex gap-2 border-t pt-4">
+        <Button variant="outline" className="flex-1" asChild>
+          <Link to={`/profile/${profile.id}`}>View Profile</Link>
+        </Button>
         {onConnect && (
-          <Button
-            size="sm"
-            variant={isConnected ? "outline" : "default"}
-            className="text-xs"
+          <Button 
+            variant={isConnected ? "secondary" : "default"} 
+            size="icon" 
             onClick={onConnect}
+            title={isConnected ? "Disconnect" : "Connect"}
           >
-            {isConnected ? "Connected" : "Connect"}
+            {isConnected ? (
+              <UserCheck className="h-4 w-4" />
+            ) : (
+              <UserPlus className="h-4 w-4" />
+            )}
           </Button>
         )}
       </CardFooter>

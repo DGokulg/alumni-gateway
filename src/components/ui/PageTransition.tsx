@@ -1,42 +1,40 @@
 
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PageTransitionProps {
   children: React.ReactNode;
-  className?: string;
 }
 
-const PageTransition = ({ children, className }: PageTransitionProps) => {
+const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState("fadeIn");
+  const [isFirstMount, setIsFirstMount] = useState(true);
 
   useEffect(() => {
-    if (location !== displayLocation) {
-      setTransitionStage("fadeOut");
-    }
-  }, [location, displayLocation]);
+    setIsFirstMount(false);
+  }, []);
 
-  const handleAnimationEnd = () => {
-    if (transitionStage === "fadeOut") {
-      setTransitionStage("fadeIn");
-      setDisplayLocation(location);
-    }
+  // Different animation for first mount vs subsequent navigations
+  const variants = {
+    initial: isFirstMount ? { opacity: 0, y: 0 } : { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 10 },
   };
 
   return (
-    <div
-      className={cn(
-        "w-full transition-opacity duration-300 ease-in-out",
-        transitionStage === "fadeIn" ? "opacity-100" : "opacity-0",
-        className
-      )}
-      onAnimationEnd={handleAnimationEnd}
-    >
-      {children}
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={variants}
+        transition={{ duration: 0.3 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

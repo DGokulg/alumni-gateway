@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  connections?: string[];
 }
 
 interface AuthContextType {
@@ -30,6 +31,7 @@ const MOCK_USERS: User[] = [
     email: "admin@example.com",
     role: "admin",
     avatar: "https://i.pravatar.cc/150?img=1",
+    connections: [],
   },
   {
     id: "2",
@@ -37,6 +39,7 @@ const MOCK_USERS: User[] = [
     email: "student@example.com",
     role: "student",
     avatar: "https://i.pravatar.cc/150?img=2",
+    connections: ["3", "4", "5"],
   },
   {
     id: "3",
@@ -44,6 +47,7 @@ const MOCK_USERS: User[] = [
     email: "alumni@example.com",
     role: "alumni",
     avatar: "https://i.pravatar.cc/150?img=3",
+    connections: ["2", "4", "6"],
   },
 ];
 

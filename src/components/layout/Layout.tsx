@@ -1,30 +1,17 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
-import { useLocation } from "react-router-dom";
+import PageTransition from "../ui/PageTransition";
 
-interface LayoutProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-const Layout = ({ children, className }: LayoutProps) => {
-  const location = useLocation();
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className={cn("flex min-h-screen flex-col bg-background", className)}>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 w-full">{children}</div>
+      <PageTransition>
+        <main className="flex-1">{children}</main>
+      </PageTransition>
       <Footer />
-      <Toaster position="top-right" />
     </div>
   );
 };

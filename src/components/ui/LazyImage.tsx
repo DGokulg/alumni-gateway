@@ -1,60 +1,61 @@
 
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "./skeleton";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
+  fallback?: React.ReactNode;
   className?: string;
-  height?: number;
-  width?: number;
-  fallbackSrc?: string;
-  loadingClassName?: string;
 }
 
-const LazyImage = ({
+const LazyImage: React.FC<LazyImageProps> = ({
   src,
   alt,
+  fallback,
   className,
-  height,
-  width,
-  fallbackSrc = "/placeholder.svg",
-  loadingClassName,
   ...props
-}: LazyImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imgSrc, setImgSrc] = useState(fallbackSrc || src);
+}) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    setLoaded(false);
+    setError(false);
+    
     const img = new Image();
     img.src = src;
+    
     img.onload = () => {
-      setImgSrc(src);
-      setIsLoaded(true);
+      setLoaded(true);
     };
+    
     img.onerror = () => {
-      if (src !== fallbackSrc) {
-        setImgSrc(fallbackSrc);
-        setIsLoaded(true);
-      }
+      setError(true);
     };
-  }, [src, fallbackSrc]);
+  }, [src]);
+
+  if (error) {
+    return fallback || (
+      <div className={cn("bg-muted flex items-center justify-center", className)}>
+        <span className="text-muted-foreground text-sm">Failed to load image</span>
+      </div>
+    );
+  }
 
   return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      height={height}
-      width={width}
-      className={cn(
-        "lazy-image",
-        !isLoaded && "lazy-image-loading",
-        isLoaded && "lazy-image-loaded",
-        !isLoaded && loadingClassName,
-        className
-      )}
-      {...props}
-    />
+    <>
+      {!loaded && <Skeleton className={cn("w-full h-full", className)} />}
+      <img 
+        src={src} 
+        alt={alt} 
+        className={cn(className, !loaded && "hidden")} 
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+        {...props}
+      />
+    </>
   );
 };
 
