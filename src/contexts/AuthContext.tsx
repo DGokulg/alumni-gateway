@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -23,34 +22,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const MOCK_USERS: User[] = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "admin",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    connections: [],
-  },
-  {
-    id: "2",
-    name: "Student User",
-    email: "student@example.com",
-    role: "student",
-    avatar: "https://i.pravatar.cc/150?img=2",
-    connections: ["3", "4", "5"],
-  },
-  {
-    id: "3",
-    name: "Alumni User",
-    email: "alumni@example.com",
-    role: "alumni",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    connections: ["2", "4", "6"],
-  },
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -68,10 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error) {
         console.error("Error checking authentication:", error);
       } finally {
-        // Simulate network delay
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 800);
+        setIsLoading(false);
       }
     };
 
@@ -82,19 +50,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Find user with matching email (demo only)
-      const foundUser = MOCK_USERS.find(u => u.email === email);
-      
-      if (foundUser && password === "password") {
-        setUser(foundUser);
-        localStorage.setItem("alumniAppUser", JSON.stringify(foundUser));
-        toast.success("Logged in successfully!");
-      } else {
-        throw new Error("Invalid credentials");
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.msg || 'Login failed');
       }
+
+      const data = await response.json();
+      const userData = {
+        ...data.user,
+        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        connections: [],
+      };
+
+      setUser(userData);
+      localStorage.setItem("alumniAppUser", JSON.stringify(userData));
+      toast.success("Logged in successfully!");
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
       console.error("Login error:", error);

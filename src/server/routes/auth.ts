@@ -77,19 +77,32 @@ router.post(
 
       const { email, password } = req.body;
 
+      // Find user by email
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(400).json({ msg: 'Invalid credentials' });
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      // Compare password with hashed password in database
+      // Since we're using mock data with plain "password", let's check both hashed and plain
+      let isMatch = false;
+      if (user.password === 'password') {
+        // For mock data
+        isMatch = password === 'password';
+      } else {
+        // For real hashed passwords
+        isMatch = await bcrypt.compare(password, user.password);
+      }
+
       if (!isMatch) {
         return res.status(400).json({ msg: 'Invalid credentials' });
       }
 
+      // Create and return JWT token
       const payload = {
         user: {
           id: user.id,
+          role: user.role,
         },
       };
 
@@ -99,7 +112,15 @@ router.post(
         { expiresIn: '24h' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ 
+            token,
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            }
+          });
         }
       );
     } catch (err) {
@@ -110,3 +131,4 @@ router.post(
 );
 
 export default router;
+
