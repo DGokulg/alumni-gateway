@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { DatabaseProvider } from "./contexts/DatabaseContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -34,9 +33,9 @@ const ProtectedRoute = ({ children, allowedRoles = [] }: { children: React.React
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <DatabaseProvider>
       <AuthProvider>
-        <DatabaseProvider>
+        <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -67,9 +66,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </DatabaseProvider>
+        </TooltipProvider>
       </AuthProvider>
-    </TooltipProvider>
+    </DatabaseProvider>
   </QueryClientProvider>
 );
 
