@@ -1,5 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useDatabase } from "./DatabaseContext";
 
 export type UserRole = "admin" | "student" | "alumni";
 
@@ -18,6 +20,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { profiles, updateProfile } = useDatabase();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -82,6 +86,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const register = async (name: string, email: string, password: string, role: UserRole) => {
+    setIsLoading(true);
+    
+    try {
+      // Register user with backend
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.msg || 'Registration failed');
+      }
+
+      const data = await response.json();
+      
+      // Generate a random ID if the backend doesn't provide one
+      const userId = data.user?.id || `user_${Date.now()}`;
+      
+      // Create a default profile in the database
+      const defaultProfile = {
+        id: userId,
+        name,
+        email,
+        role,
+        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        connections: [],
+        headline: `${role === 'student' ? 'Student' : 'Alumni'} at Technical University`,
+        bio: `I am a ${role} at Technical University.`,
+        skills: [],
+        location: '',
+      };
+      
+      // Update the profile in the database
+      updateProfile(userId, defaultProfile);
+      
+      toast.success("Registration successful! Please log in.");
+    } catch (error) {
+      toast.error("Registration failed. Please try again.");
+      console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("alumniAppUser");
@@ -92,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     user,
     isLoading,
     login,
+    register,
     logout,
     isAuthenticated: !!user,
   };

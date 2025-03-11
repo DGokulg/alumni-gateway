@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,16 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import Layout from "@/components/layout/Layout";
 import PageContainer from "@/components/layout/PageContainer";
+import { UserRole } from "@/contexts/AuthContext";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     name: "",
-    role: "student"
+    role: "student" as UserRole
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +35,7 @@ const Login = () => {
   const handleRoleChange = (value: string) => {
     setFormData({
       ...formData,
-      role: value
+      role: value as UserRole
     });
   };
 
@@ -49,29 +49,15 @@ const Login = () => {
         await login(formData.email, formData.password);
         navigate("/");
       } else {
-        // Register new user
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role,
-          }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.msg || 'Registration failed');
-        }
-
-        toast.success("Registration successful! Please log in.");
+        await register(
+          formData.name,
+          formData.email,
+          formData.password,
+          formData.role
+        );
         setIsLogin(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || "An error occurred");
       console.error("Auth error:", err);
     } finally {
