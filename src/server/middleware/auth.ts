@@ -2,11 +2,17 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+interface UserPayload {
+  id: string;
+  role: string;
+}
+
 interface AuthRequest extends Request {
-  user?: any;
+  user?: UserPayload;
 }
 
 export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
+  // Get token from header
   const token = req.header('x-auth-token');
 
   if (!token) {
@@ -14,7 +20,7 @@ export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'defaultsecret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'defaultsecret') as { user: UserPayload };
     req.user = decoded.user;
     next();
   } catch (err) {
