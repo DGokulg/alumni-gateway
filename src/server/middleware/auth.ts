@@ -7,9 +7,13 @@ interface UserPayload {
   role: string;
 }
 
-// Extend the Express Request type properly
-interface AuthRequest extends Request {
-  user?: UserPayload;
+// Extend the Express Request type
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserPayload;
+    }
+  }
 }
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
@@ -22,7 +26,7 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'defaultsecret') as { user: UserPayload };
-    (req as AuthRequest).user = decoded.user;
+    req.user = decoded.user;
     next();
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
