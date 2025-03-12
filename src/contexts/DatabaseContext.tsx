@@ -4,7 +4,15 @@ import { toast } from "sonner";
 
 export type { UserRole };
 
-export interface Profile extends User {
+interface BaseUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+}
+
+export interface Profile extends BaseUser {
   headline?: string;
   bio?: string;
   education?: Education[];
