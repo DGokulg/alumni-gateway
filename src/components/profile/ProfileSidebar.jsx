@@ -1,18 +1,13 @@
 
 import React from "react";
-import { Profile } from "@/contexts/DatabaseContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { Users } from "lucide-react";
 
-interface ProfileSidebarProps {
-  profile: Profile;
-}
-
-const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ profile }) => {
+const ProfileSidebar = ({ profile }) => {
   // Get initials for avatar fallback
-  const getInitials = (name: string) => {
+  const getInitials = (name) => {
     return name
       .split(" ")
       .map((part) => part[0])

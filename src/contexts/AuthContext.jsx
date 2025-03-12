@@ -3,34 +3,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useDatabase } from "./DatabaseContext";
 
-export type UserRole = "admin" | "student" | "alumni";
+const AuthContext = createContext(undefined);
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar?: string;
-  connections?: string[];
-}
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider = ({ children }) => {
   const { profiles, updateProfile } = useDatabase();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for saved user on mount
   useEffect(() => {
@@ -50,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email, password) => {
     setIsLoading(true);
     
     try {
@@ -86,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: UserRole) => {
+  const register = async (name, email, password, role) => {
     setIsLoading(true);
     
     try {

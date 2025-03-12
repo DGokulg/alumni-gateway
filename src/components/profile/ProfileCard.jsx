@@ -1,21 +1,14 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Profile } from "@/contexts/DatabaseContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { UserCheck, UserPlus } from "lucide-react";
 
-interface ProfileCardProps {
-  profile: Profile;
-  isConnected?: boolean;
-  onConnect?: () => void;
-}
-
-const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isConnected, onConnect }) => {
+const ProfileCard = ({ profile, isConnected, onConnect }) => {
   // Get initials for avatar fallback
-  const getInitials = (name: string) => {
+  const getInitials = (name) => {
     return name
       .split(" ")
       .map((part) => part[0])

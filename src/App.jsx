@@ -18,7 +18,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 const queryClient = new QueryClient();
 
 // Protected route component
-const ProtectedRoute = ({ children, allowedRoles = [] }: { children: React.ReactNode, allowedRoles?: string[] }) => {
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, isLoading, isAuthenticated } = useAuth();
   
   if (isLoading) return <div className="flex items-center justify-center h-screen">Loading...</div>;

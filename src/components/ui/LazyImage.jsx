@@ -3,14 +3,7 @@ import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "./skeleton";
 
-interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src: string;
-  alt: string;
-  fallback?: React.ReactNode;
-  className?: string;
-}
-
-const LazyImage: React.FC<LazyImageProps> = ({
+const LazyImage = ({
   src,
   alt,
   fallback,

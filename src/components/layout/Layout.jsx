@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import PageTransition from "../ui/PageTransition";
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
