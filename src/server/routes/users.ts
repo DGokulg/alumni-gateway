@@ -1,7 +1,7 @@
 
 import express from 'express';
 import { auth } from '../middleware/auth';
-import { User } from '../models/User';
+import User from '../models/User';
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get('/profile/:id', auth, async (req, res) => {
     }
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(500).send('Server Error');
   }
 });
@@ -23,13 +23,13 @@ router.get('/profile/:id', auth, async (req, res) => {
 router.put('/profile', auth, async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
-      req.user.id,
+      req.user?.id,
       { $set: req.body },
       { new: true }
     ).select('-password');
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(500).send('Server Error');
   }
 });
@@ -37,23 +37,33 @@ router.put('/profile', auth, async (req, res) => {
 // Add connection
 router.post('/connections/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user?.id);
     const targetUser = await User.findById(req.params.id);
 
     if (!user || !targetUser) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
+    // Check if connections property exists and is an array
+    if (!Array.isArray(user.connections)) {
+      user.connections = [];
+    }
+    
+    if (!Array.isArray(targetUser.connections)) {
+      targetUser.connections = [];
+    }
+
+    // Check if connection already exists
     if (!user.connections.includes(req.params.id)) {
       user.connections.push(req.params.id);
-      targetUser.connections.push(req.user.id);
+      targetUser.connections.push(req.user?.id);
       await user.save();
       await targetUser.save();
     }
 
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(500).send('Server Error');
   }
 });

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 interface UserPayload {
   id: string;
-  role: string;
+  role?: string;
 }
 
 // Extend the Express Request type
@@ -32,3 +32,5 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };
+
+export default auth; // Add default export for backward compatibility

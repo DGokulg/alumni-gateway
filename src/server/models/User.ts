@@ -51,7 +51,9 @@ const baseUserSchema = new mongoose.Schema({
 const studentSchema = new mongoose.Schema({
   registrationNumber: {
     type: String,
-    required: [function() { return this.role === UserRole.STUDENT; }, 'Registration number is required for students'],
+    required: function(this: any) { 
+      return this.role === UserRole.STUDENT; 
+    },
     trim: true,
   },
 });
@@ -64,34 +66,46 @@ const alumniSchema = new mongoose.Schema({
   },
   graduationYear: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Graduation year is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   jobTitle: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Job title is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   companyName: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Company name is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   industry: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Industry is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   workExperience: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Work experience is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   location: {
     type: String,
-    required: [function() { return this.role === UserRole.ALUMNI; }, 'Location is required for alumni'],
+    required: function(this: any) { 
+      return this.role === UserRole.ALUMNI; 
+    },
   },
   linkedinProfile: {
     type: String,
   },
   headline: {
     type: String,
-    default: function() {
+    default: function(this: any) {
       return this.jobTitle ? `${this.jobTitle} at ${this.companyName}` : '';
     },
   },
@@ -109,7 +123,7 @@ const alumniSchema = new mongoose.Schema({
   education: [{
     institution: {
       type: String,
-      default: function() {
+      default: function(this: any) {
         return this.role === UserRole.ALUMNI ? 'Technical University' : '';
       },
     },
@@ -169,15 +183,15 @@ UserSchema.pre('save', async function(next) {
   
   try {
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    this.password = await bcrypt.hash(this.password as string, salt);
     next();
   } catch (error) {
-    next(error);
+    next(error as Error);
   }
 });
 
 // Method to check if password is correct
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+UserSchema.methods.matchPassword = async function(enteredPassword: string) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
@@ -185,23 +199,27 @@ UserSchema.methods.matchPassword = async function(enteredPassword) {
 UserSchema.pre('save', function(next) {
   if (this.isNew && this.role === UserRole.ALUMNI) {
     // Initialize education array if it doesn't exist
-    this.education = this.education || [];
+    if (!this.education) {
+      this.education = [];
+    }
     
     // Only add default education if none exists
-    if (this.education.length === 0) {
-      const graduationYear = this.graduationYear;
+    if (Array.isArray(this.education) && this.education.length === 0) {
+      const graduationYear = this.graduationYear as string;
       const endDate = `${graduationYear}-06-30`;
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      this.education.push({
-        institution: 'Technical University',
-        degree: 'Bachelor\'s',
-        field: this.program,
-        startDate,
-        endDate,
-        current: false,
-      });
+      if (Array.isArray(this.education)) {
+        this.education.push({
+          institution: 'Technical University',
+          degree: 'Bachelor\'s',
+          field: this.program,
+          startDate,
+          endDate,
+          current: false,
+        });
+      }
     }
   }
   next();

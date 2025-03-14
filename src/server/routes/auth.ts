@@ -3,7 +3,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import User, { UserRole } from '../models/User';
-import auth from '../middleware/auth';
+import { auth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -27,8 +27,8 @@ router.post(
 
     try {
       // Check if user exists
-      let user = await User.findOne({ email: req.body.email });
-      if (user) {
+      let userExists = await User.findOne({ email: req.body.email });
+      if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
       }
 
@@ -51,7 +51,7 @@ router.post(
       }
 
       // Create user instance
-      user = new User({
+      const user = new User({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
