@@ -1,3 +1,4 @@
+
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -268,7 +269,7 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      // Use a plain object that matches the Education schema rather than IEducation interface
+      // Create education item as a plain object directly with the structure expected by mongoose
       this.education.push({
         institution: 'Technical University',
         degree: 'Bachelor\'s',
@@ -276,7 +277,7 @@ UserSchema.pre('save', function(next) {
         startDate,
         endDate,
         current: false
-      });
+      } as any); // Use type assertion to bypass type checking
     }
   }
   next();
