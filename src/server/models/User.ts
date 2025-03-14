@@ -1,11 +1,57 @@
 
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export enum UserRole {
   STUDENT = 'student',
   ALUMNI = 'alumni',
   ADMIN = 'admin',
+}
+
+// Define interfaces for better type safety
+export interface IEducation {
+  institution: string;
+  degree: string;
+  field: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+}
+
+export interface IExperience {
+  company: string;
+  title: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  description: string;
+}
+
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  avatar: string;
+  program: string;
+  createdAt: Date;
+  registrationNumber?: string;
+  phoneNumber?: string;
+  graduationYear?: string;
+  jobTitle?: string;
+  companyName?: string;
+  industry?: string;
+  workExperience?: string;
+  location?: string;
+  linkedinProfile?: string;
+  headline?: string;
+  bio?: string;
+  skills?: string[];
+  connections?: mongoose.Types.ObjectId[];
+  education?: IEducation[];
+  experience?: IExperience[];
+  matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
 // Base schema with common fields for all users
@@ -210,16 +256,16 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      if (Array.isArray(this.education)) {
-        this.education.push({
-          institution: 'Technical University',
-          degree: 'Bachelor\'s',
-          field: this.program,
-          startDate,
-          endDate,
-          current: false,
-        });
-      }
+      const educationItem = {
+        institution: 'Technical University',
+        degree: 'Bachelor\'s',
+        field: this.program,
+        startDate,
+        endDate,
+        current: false,
+      };
+      
+      this.education.push(educationItem);
     }
   }
   next();
@@ -234,6 +280,6 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;

@@ -27,7 +27,7 @@ router.post(
 
     try {
       // Check if user exists
-      let userExists = await User.findOne({ email: req.body.email });
+      const userExists = await User.findOne({ email: req.body.email }).exec();
       if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
       }
@@ -110,7 +110,7 @@ router.post(
 
     try {
       // Check for user
-      const user = await User.findOne({ email }).select('+password');
+      const user = await User.findOne({ email }).select('+password').exec();
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
@@ -154,7 +154,7 @@ router.post(
 // @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user?.id).exec();
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

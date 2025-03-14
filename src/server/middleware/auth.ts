@@ -33,4 +33,4 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default auth; // Add default export for backward compatibility
+// No default export, use named export

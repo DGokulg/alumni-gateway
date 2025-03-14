@@ -8,7 +8,7 @@ const router = express.Router();
 // Get user profile
 router.get('/profile/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id).exec();
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
@@ -26,7 +26,7 @@ router.put('/profile', auth, async (req, res) => {
       req.user?.id,
       { $set: req.body },
       { new: true }
-    ).select('-password');
+    ).exec();
     res.json(user);
   } catch (err) {
     console.error(err);
@@ -37,8 +37,8 @@ router.put('/profile', auth, async (req, res) => {
 // Add connection
 router.post('/connections/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user?.id);
-    const targetUser = await User.findById(req.params.id);
+    const user = await User.findById(req.user?.id).exec();
+    const targetUser = await User.findById(req.params.id).exec();
 
     if (!user || !targetUser) {
       return res.status(404).json({ msg: 'User not found' });
@@ -54,9 +54,10 @@ router.post('/connections/:id', auth, async (req, res) => {
     }
 
     // Check if connection already exists
-    if (!user.connections.includes(req.params.id)) {
-      user.connections.push(req.params.id);
-      targetUser.connections.push(req.user?.id);
+    const connectionId = req.params.id;
+    if (!user.connections.some(conn => conn.toString() === connectionId)) {
+      user.connections.push(connectionId as any);
+      targetUser.connections.push(req.user?.id as any);
       await user.save();
       await targetUser.save();
     }
