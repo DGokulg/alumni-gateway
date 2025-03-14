@@ -269,15 +269,18 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      // Create education item as a plain object directly with the structure expected by mongoose
-      this.education.push({
+      // Create an education document with the proper constructor
+      const educationDoc = {
         institution: 'Technical University',
         degree: 'Bachelor\'s',
         field: this.program as string,
         startDate,
         endDate,
         current: false
-      } as any); // Use type assertion to bypass type checking
+      };
+      
+      // Use push directly
+      this.education.push(educationDoc as any);
     }
   }
   next();
