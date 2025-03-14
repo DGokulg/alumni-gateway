@@ -26,8 +26,8 @@ router.post(
     }
 
     try {
-      // Check if user exists
-      const userExists = await User.findOne({ email: req.body.email }).lean();
+      // Check if user exists - use exec() to properly resolve the promise
+      const userExists = await User.findOne({ email: req.body.email }).lean().exec();
       if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
       }
@@ -109,8 +109,8 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      // Check for user
-      const user = await User.findOne({ email }).select('+password');
+      // Check for user - use exec() to properly resolve the promise
+      const user = await User.findOne({ email }).select('+password').exec();
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
@@ -154,7 +154,7 @@ router.post(
 // @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user?.id);
+    const user = await User.findById(req.user?.id).exec();
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

@@ -1,4 +1,3 @@
-
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -269,17 +268,15 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      // Create an education item that matches IEducation interface
-      const educationItem: IEducation = {
+      // Use a plain object that matches the Education schema rather than IEducation interface
+      this.education.push({
         institution: 'Technical University',
         degree: 'Bachelor\'s',
         field: this.program as string,
         startDate,
         endDate,
         current: false
-      };
-      
-      this.education.push(educationItem);
+      });
     }
   }
   next();
