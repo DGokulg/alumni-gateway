@@ -3,6 +3,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useDatabase } from "./DatabaseContext";
 
+export const UserRole = {
+  STUDENT: "student",
+  ALUMNI: "alumni",
+  ADMIN: "admin"
+};
+
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
@@ -42,19 +48,19 @@ export const AuthProvider = ({ children }) => {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.msg || 'Login failed');
+        throw new Error(data.message || 'Login failed');
       }
 
       const data = await response.json();
       const userData = {
         ...data.user,
-        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        connections: [],
+        avatar: data.user.avatar || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
       };
 
       setUser(userData);
       localStorage.setItem("alumniAppUser", JSON.stringify(userData));
       toast.success("Logged in successfully!");
+      return userData;
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
       console.error("Login error:", error);
@@ -64,49 +70,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, role) => {
+  const register = async (userData) => {
     setIsLoading(true);
     
     try {
-      // Register user with backend
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.msg || 'Registration failed');
+        throw new Error(data.message || 'Registration failed');
       }
 
       const data = await response.json();
-      
-      // Generate a random ID if the backend doesn't provide one
-      const userId = data.user?.id || `user_${Date.now()}`;
-      
-      // Create a default profile in the database
-      const defaultProfile = {
-        id: userId,
-        name,
-        email,
-        role,
-        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        connections: [],
-        headline: `${role === 'student' ? 'Student' : 'Alumni'} at Technical University`,
-        bio: `I am a ${role} at Technical University.`,
-        skills: [],
-        location: '',
-      };
-      
-      // Update the profile in the database
-      updateProfile(userId, defaultProfile);
-      
       toast.success("Registration successful! Please log in.");
+      return data;
     } catch (error) {
-      toast.error("Registration failed. Please try again.");
+      toast.error(error.message || "Registration failed. Please try again.");
       console.error("Registration error:", error);
       throw error;
     } finally {

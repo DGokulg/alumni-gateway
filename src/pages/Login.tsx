@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,58 +7,49 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import RegisterForm from "@/components/auth/RegisterForm";
 import Layout from "@/components/layout/Layout";
 import PageContainer from "@/components/layout/PageContainer";
-import { UserRole } from "@/contexts/AuthContext";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const Login = () => {
-  const { login, register } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-    role: "student" as UserRole
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    });
-  };
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleRoleChange = (value: string) => {
-    setFormData({
-      ...formData,
-      role: value as UserRole
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setError("");
     setIsLoading(true);
 
     try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
-        navigate("/");
-      } else {
-        await register(
-          formData.name,
-          formData.email,
-          formData.password,
-          formData.role
-        );
-        setIsLogin(true);
-      }
-    } catch (err: any) {
+      await login(data.email, data.password);
+      navigate("/");
+    } catch (err) {
       setError(err.message || "An error occurred");
       console.error("Auth error:", err);
     } finally {
@@ -65,10 +57,14 @@ const Login = () => {
     }
   };
 
+  const handleRegisterSuccess = () => {
+    setIsLogin(true);
+  };
+
   return (
     <Layout>
       <PageContainer className="flex items-center justify-center min-h-[80vh]">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">
               {isLogin ? "Sign in" : "Create an account"}
@@ -85,69 +81,51 @@ const Login = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                {!isLogin && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required={!isLogin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Select value={formData.role} onValueChange={handleRoleChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="student">Student</SelectItem>
-                          <SelectItem value="alumni">Alumni</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    {isLogin && (
-                      <Button variant="link" className="p-0 h-auto text-xs">
-                        Forgot password?
-                      </Button>
+            
+            {isLogin ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
                   />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading
-                    ? "Processing..."
-                    : isLogin
-                    ? "Sign in"
-                    : "Create account"}
-                </Button>
-              </div>
-            </form>
+                  
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Password</FormLabel>
+                          <Button variant="link" className="p-0 h-auto text-xs">
+                            Forgot password?
+                          </Button>
+                        </div>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter your password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : "Sign in"}
+                  </Button>
+                </form>
+              </Form>
+            ) : (
+              <RegisterForm onSuccess={handleRegisterSuccess} />
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button
