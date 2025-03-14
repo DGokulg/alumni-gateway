@@ -1,5 +1,5 @@
 
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export enum UserRole {
@@ -54,8 +54,67 @@ export interface IUser extends Document {
   matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
+// Define schema types for education and experience
+const EducationSchema = new Schema<IEducation>({
+  institution: {
+    type: String,
+    required: true,
+  },
+  degree: {
+    type: String,
+    required: true,
+  },
+  field: {
+    type: String,
+    required: true,
+  },
+  startDate: {
+    type: String,
+    required: true,
+  },
+  endDate: {
+    type: String,
+    required: true,
+  },
+  current: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const ExperienceSchema = new Schema<IExperience>({
+  company: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  startDate: {
+    type: String,
+    required: true,
+  },
+  endDate: {
+    type: String,
+    required: true,
+  },
+  current: {
+    type: Boolean,
+    default: false,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+});
+
 // Base schema with common fields for all users
-const baseUserSchema = new mongoose.Schema({
+const baseUserSchema = new Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
@@ -94,7 +153,7 @@ const baseUserSchema = new mongoose.Schema({
 });
 
 // Student-specific fields
-const studentSchema = new mongoose.Schema({
+const studentSchema = new Schema({
   registrationNumber: {
     type: String,
     required: function(this: any) { 
@@ -105,7 +164,7 @@ const studentSchema = new mongoose.Schema({
 });
 
 // Alumni-specific fields
-const alumniSchema = new mongoose.Schema({
+const alumniSchema = new Schema({
   phoneNumber: {
     type: String,
     trim: true,
@@ -166,58 +225,12 @@ const alumniSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   }],
-  education: [{
-    institution: {
-      type: String,
-      default: function(this: any) {
-        return this.role === UserRole.ALUMNI ? 'Technical University' : '';
-      },
-    },
-    degree: {
-      type: String,
-    },
-    field: {
-      type: String,
-    },
-    startDate: {
-      type: String,
-    },
-    endDate: {
-      type: String,
-    },
-    current: {
-      type: Boolean,
-      default: false,
-    },
-  }],
-  experience: [{
-    company: {
-      type: String,
-    },
-    title: {
-      type: String,
-    },
-    location: {
-      type: String,
-    },
-    startDate: {
-      type: String,
-    },
-    endDate: {
-      type: String,
-    },
-    current: {
-      type: Boolean,
-      default: false,
-    },
-    description: {
-      type: String,
-    },
-  }],
+  education: [EducationSchema], // Use the schema for education
+  experience: [ExperienceSchema], // Use the schema for experience
 });
 
 // Combine schemas based on user role
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
   ...baseUserSchema.obj,
   ...studentSchema.obj,
   ...alumniSchema.obj,
@@ -256,16 +269,14 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      const educationItem = {
+      this.education.push({
         institution: 'Technical University',
         degree: 'Bachelor\'s',
         field: this.program,
         startDate,
         endDate,
         current: false,
-      };
-      
-      this.education.push(educationItem);
+      } as IEducation);
     }
   }
   next();
@@ -280,6 +291,7 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
+// Create and export the model
 const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;

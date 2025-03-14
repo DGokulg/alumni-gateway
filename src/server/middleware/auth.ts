@@ -32,5 +32,3 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };
-
-// No default export, use named export

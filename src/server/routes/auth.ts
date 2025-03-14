@@ -2,7 +2,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
-import User, { UserRole } from '../models/User';
+import User, { UserRole, IUser } from '../models/User';
 import { auth } from '../middleware/auth';
 
 const router = express.Router();
@@ -27,7 +27,7 @@ router.post(
 
     try {
       // Check if user exists
-      const userExists = await User.findOne({ email: req.body.email }).exec();
+      const userExists = await User.findOne({ email: req.body.email });
       if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
       }
@@ -110,7 +110,7 @@ router.post(
 
     try {
       // Check for user
-      const user = await User.findOne({ email }).select('+password').exec();
+      const user = await User.findOne({ email }).select('+password');
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
@@ -154,7 +154,7 @@ router.post(
 // @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user?.id).exec();
+    const user = await User.findById(req.user?.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
