@@ -269,14 +269,17 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      this.education.push({
+      // Create an education item that matches IEducation interface
+      const educationItem: IEducation = {
         institution: 'Technical University',
         degree: 'Bachelor\'s',
-        field: this.program,
+        field: this.program as string,
         startDate,
         endDate,
-        current: false,
-      } as IEducation);
+        current: false
+      };
+      
+      this.education.push(educationItem);
     }
   }
   next();
