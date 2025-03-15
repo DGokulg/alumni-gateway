@@ -269,8 +269,8 @@ UserSchema.pre('save', function(next) {
       const startYear = parseInt(graduationYear) - 4;
       const startDate = `${startYear}-09-01`;
       
-      // Create an education document with the proper constructor
-      const educationDoc = {
+      // Create a plain object that matches the education schema
+      const educationItem = {
         institution: 'Technical University',
         degree: 'Bachelor\'s',
         field: this.program as string,
@@ -279,8 +279,8 @@ UserSchema.pre('save', function(next) {
         current: false
       };
       
-      // Use push directly
-      this.education.push(educationDoc as any);
+      // Push the education item using type assertion to avoid type errors
+      (this.education as any).push(educationItem);
     }
   }
   next();
