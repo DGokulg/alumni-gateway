@@ -279,7 +279,7 @@ UserSchema.pre('save', function(next) {
         current: false
       };
       
-      // Push the education item using type assertion to avoid type errors
+      // Push the education item using proper casting to avoid type errors
       (this.education as any).push(educationItem);
     }
   }
